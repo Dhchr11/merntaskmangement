@@ -20,9 +20,18 @@ function App() {
   const [searchQuery, setSearchQuery] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
 
-  // Sync theme with localStorage
+  // Sync theme with localStorage and document body for 100% full-page coverage
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      document.body.style.backgroundColor = "#0f172a"; // slate-900
+      document.body.style.color = "#f8fafc";
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.body.style.backgroundColor = "#f1f5f9"; // slate-100
+      document.body.style.color = "#0f172a";
+    }
   }, [darkMode]);
 
   useEffect(() => {
@@ -101,10 +110,10 @@ function App() {
   });
 
   return (
-    <div className={`min-h-screen py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+    <div className={`min-h-screen w-full py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
       darkMode 
-        ? "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-slate-100" 
-        : "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-100 via-slate-200 to-slate-300 text-slate-800"
+        ? "bg-slate-900 text-slate-100" 
+        : "bg-slate-100 text-slate-800"
     }`}>
       <div className="max-w-2xl mx-auto">
         
@@ -164,7 +173,7 @@ function App() {
         <main className={`backdrop-blur-xl border rounded-3xl p-6 sm:p-8 shadow-2xl transition-all duration-300 ${
           darkMode 
             ? "bg-slate-800/40 border-slate-700/60 shadow-black/50" 
-            : "bg-white/80 border-slate-200/80 shadow-slate-300/50"
+            : "bg-white/90 border-slate-200/90 shadow-slate-200/80"
         }`}>
           {/* Add Task Form */}
           <TaskForm addtask={addtask} isSubmitting={isSubmitting} darkMode={darkMode} />
