@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function TaskForm({ addtask, isSubmitting }) {
+function TaskForm({ addtask, isSubmitting, darkMode }) {
   const [title, settitle] = useState("");
   const [validationError, setValidationError] = useState("");
   const maxLength = 50;
@@ -52,7 +52,11 @@ function TaskForm({ addtask, isSubmitting }) {
             maxLength={maxLength}
             disabled={isSubmitting}
             onChange={handleChange}
-            className="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-inner disabled:opacity-50"
+            className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-inner disabled:opacity-50 ${
+              darkMode 
+                ? "bg-slate-800/80 border-slate-700/80 text-slate-100 placeholder-slate-400" 
+                : "bg-white border-slate-300 text-slate-800 placeholder-slate-400 shadow-slate-200/50"
+            }`}
           />
         </div>
         <button 
@@ -81,12 +85,14 @@ function TaskForm({ addtask, isSubmitting }) {
       <div className="flex items-center justify-between mt-2 px-1 text-xs">
         <div>
           {validationError && (
-            <span className="text-rose-400 font-medium flex items-center gap-1 animate-pulse">
+            <span className="text-rose-500 font-medium flex items-center gap-1 animate-pulse">
               ⚠️ {validationError}
             </span>
           )}
         </div>
-        <span className={`font-mono transition-colors ${isNearLimit ? 'text-rose-400 font-bold' : 'text-slate-400'}`}>
+        <span className={`font-mono transition-colors ${
+          isNearLimit ? 'text-rose-500 font-bold' : darkMode ? 'text-slate-400' : 'text-slate-500'
+        }`}>
           📝 {charCount}/{maxLength}
         </span>
       </div>

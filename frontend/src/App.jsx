@@ -10,9 +10,20 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
+  // Theme State (Persisted in localStorage)
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    return savedTheme ? savedTheme === "dark" : true;
+  })
+
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
+
+  // Sync theme with localStorage
+  useEffect(() => {
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   useEffect(() => {
     const fetchTasksData = async () => {
@@ -90,25 +101,52 @@ function App() {
   });
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-slate-100">
+    <div className={`min-h-screen py-10 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${
+      darkMode 
+        ? "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-slate-100" 
+        : "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-100 via-slate-200 to-slate-300 text-slate-800"
+    }`}>
       <div className="max-w-2xl mx-auto">
         
         {/* Header */}
-        <header className="text-center mb-8">
-          <div className="inline-block p-2 px-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-widest mb-3">
+        <header className="text-center mb-8 relative">
+          {/* Dark / Light Mode Toggle Button */}
+          <button
+            onClick={() => setDarkMode((prev) => !prev)}
+            className={`absolute right-0 top-0 p-2.5 rounded-2xl border transition-all duration-300 flex items-center gap-2 text-xs font-bold cursor-pointer shadow-md active:scale-95 ${
+              darkMode 
+                ? "bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700 shadow-slate-900/50" 
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-slate-200"
+            }`}
+            title="Toggle Light / Dark Mode"
+          >
+            {darkMode ? (
+              <>
+                <span className="text-base">☀️</span>
+                <span className="hidden sm:inline">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <span className="text-base">🌙</span>
+                <span className="hidden sm:inline">Dark Mode</span>
+              </>
+            )}
+          </button>
+
+          <div className="inline-block p-2 px-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 font-semibold text-xs uppercase tracking-widest mb-3">
             ✨ MERN Stack Task Manager
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
             Organize Your Work
           </h1>
-          <p className="text-slate-400 text-sm mt-2">
+          <p className={`text-sm mt-2 ${darkMode ? "text-slate-400" : "text-slate-600"}`}>
             Manage your daily tasks with real-time MongoDB synchronization.
           </p>
         </header>
 
         {/* Error Alert Banner */}
         {error && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between shadow-lg backdrop-blur-md animate-fade-in">
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-500 dark:text-rose-300 text-sm flex items-center justify-between shadow-lg backdrop-blur-md animate-fade-in">
             <div className="flex items-center gap-2">
               <span className="text-base">⚠️</span>
               <span>{error}</span>
@@ -123,9 +161,13 @@ function App() {
         )}
 
         {/* Main Content Container */}
-        <main className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50">
+        <main className={`backdrop-blur-xl border rounded-3xl p-6 sm:p-8 shadow-2xl transition-all duration-300 ${
+          darkMode 
+            ? "bg-slate-800/40 border-slate-700/60 shadow-black/50" 
+            : "bg-white/80 border-slate-200/80 shadow-slate-300/50"
+        }`}>
           {/* Add Task Form */}
-          <TaskForm addtask={addtask} isSubmitting={isSubmitting} />
+          <TaskForm addtask={addtask} isSubmitting={isSubmitting} darkMode={darkMode} />
 
           {/* Search, Filter & Statistics */}
           <TaskFilter 
@@ -136,23 +178,26 @@ function App() {
             totalCount={totalCount}
             completedCount={completedCount}
             pendingCount={pendingCount}
+            darkMode={darkMode}
           />
           
           {/* Task List / Loading / Empty States */}
           <div className="space-y-2 mt-4">
             {loading ? (
               <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
-                <svg className="animate-spin h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin h-8 w-8 text-indigo-500" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 <span className="text-sm font-medium">Loading your tasks...</span>
               </div>
             ) : filteredTasks.length === 0 ? (
-              <div className="py-12 text-center bg-slate-900/40 border border-slate-800 rounded-2xl">
+              <div className={`py-12 text-center border rounded-2xl ${
+                darkMode ? "bg-slate-900/40 border-slate-800" : "bg-slate-50 border-slate-200"
+              }`}>
                 <span className="text-4xl block mb-2">🔍</span>
-                <p className="text-slate-300 font-semibold text-base">Task not found.</p>
-                <p className="text-slate-500 text-xs mt-1">Try adjusting your search keyword or status filter.</p>
+                <p className={`font-semibold text-base ${darkMode ? "text-slate-300" : "text-slate-700"}`}>Task not found.</p>
+                <p className={`text-xs mt-1 ${darkMode ? "text-slate-500" : "text-slate-400"}`}>Try adjusting your search keyword or status filter.</p>
               </div>
             ) : (
               filteredTasks.map((task) => (
@@ -161,6 +206,7 @@ function App() {
                   task={task} 
                   toggleTask={toggleTask} 
                   deletetask={deletetask} 
+                  darkMode={darkMode}
                 />
               ))
             )}
@@ -168,7 +214,7 @@ function App() {
         </main>
 
         {/* Footer */}
-        <footer className="text-center mt-8 text-xs text-slate-500 font-medium">
+        <footer className={`text-center mt-8 text-xs font-medium ${darkMode ? "text-slate-500" : "text-slate-400"}`}>
           MERN Task Manager • Powered by React, Vite, Express & MongoDB
         </footer>
 
