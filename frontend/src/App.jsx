@@ -3,7 +3,6 @@ import TaskForm from './components/TaskForm'
 import TaskItem from './components/TaskItem'
 import TaskFilter from './components/TaskFilter'
 import { getTasks, createTask, updateTask, deleteTask } from './services/taskService'
-import './App.css'
 
 function App() {
   const [tasks, settasks] = useState([])
@@ -91,42 +90,89 @@ function App() {
   });
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
-      <h1>MERN Task Manager</h1>
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-slate-100">
+      <div className="max-w-2xl mx-auto">
+        
+        {/* Header */}
+        <header className="text-center mb-8">
+          <div className="inline-block p-2 px-4 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-widest mb-3">
+            ✨ MERN Stack Task Manager
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
+            Organize Your Work
+          </h1>
+          <p className="text-slate-400 text-sm mt-2">
+            Manage your daily tasks with real-time MongoDB synchronization.
+          </p>
+        </header>
 
-      <TaskForm addtask={addtask} isSubmitting={isSubmitting} />
+        {/* Error Alert Banner */}
+        {error && (
+          <div className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between shadow-lg backdrop-blur-md animate-fade-in">
+            <div className="flex items-center gap-2">
+              <span className="text-base">⚠️</span>
+              <span>{error}</span>
+            </div>
+            <button 
+              onClick={() => setError(null)} 
+              className="ml-4 text-xs font-bold uppercase bg-rose-500/20 hover:bg-rose-500/30 px-3 py-1.5 rounded-lg border border-rose-500/30 transition-all cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
-      {error && (
-        <div style={{ color: 'red', border: '1px solid red', padding: '8px', margin: '10px 0', borderRadius: '4px' }}>
-          <span>⚠️ {error}</span>
-          <button onClick={() => setError(null)} style={{ marginLeft: '10px' }}>Dismiss</button>
-        </div>
-      )}
+        {/* Main Content Container */}
+        <main className="bg-slate-800/40 backdrop-blur-xl border border-slate-700/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/50">
+          {/* Add Task Form */}
+          <TaskForm addtask={addtask} isSubmitting={isSubmitting} />
 
-      <TaskFilter 
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        totalCount={totalCount}
-        completedCount={completedCount}
-        pendingCount={pendingCount}
-      />
-      
-      {loading ? (
-        <p>Loading tasks...</p>
-      ) : filteredTasks.length === 0 ? (
-        <p style={{ fontWeight: 'bold', color: '#666', marginTop: '20px' }}>Task not found.</p>
-      ) : (
-        filteredTasks.map((task) => (
-          <TaskItem 
-            key={task._id || task.id} 
-            task={task} 
-            toggleTask={toggleTask} 
-            deletetask={deletetask} 
+          {/* Search, Filter & Statistics */}
+          <TaskFilter 
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            totalCount={totalCount}
+            completedCount={completedCount}
+            pendingCount={pendingCount}
           />
-        ))
-      )}
+          
+          {/* Task List / Loading / Empty States */}
+          <div className="space-y-2 mt-4">
+            {loading ? (
+              <div className="py-12 text-center text-slate-400 flex flex-col items-center justify-center gap-3">
+                <svg className="animate-spin h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span className="text-sm font-medium">Loading your tasks...</span>
+              </div>
+            ) : filteredTasks.length === 0 ? (
+              <div className="py-12 text-center bg-slate-900/40 border border-slate-800 rounded-2xl">
+                <span className="text-4xl block mb-2">🔍</span>
+                <p className="text-slate-300 font-semibold text-base">Task not found.</p>
+                <p className="text-slate-500 text-xs mt-1">Try adjusting your search keyword or status filter.</p>
+              </div>
+            ) : (
+              filteredTasks.map((task) => (
+                <TaskItem 
+                  key={task._id || task.id} 
+                  task={task} 
+                  toggleTask={toggleTask} 
+                  deletetask={deletetask} 
+                />
+              ))
+            )}
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="text-center mt-8 text-xs text-slate-500 font-medium">
+          MERN Task Manager • Powered by React, Vite, Express & MongoDB
+        </footer>
+
+      </div>
     </div>
   )
 }
