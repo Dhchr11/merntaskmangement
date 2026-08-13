@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
+import TaskForm from './components/TaskForm'
+import TaskItem from './components/TaskItem'
 import './App.css'
 
 function App() {
   const [tasks, settasks] = useState([])
-  const [title, settitle] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5000/api/tasks")
@@ -22,10 +23,7 @@ function App() {
       });
   }, [])
 
-  const addtask = async (e) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-
+  const addtask = async (title) => {
     try {
       const res = await fetch("http://localhost:5000/api/tasks", {
         method: "POST",
@@ -39,7 +37,6 @@ function App() {
       const newtask = await res.json();
       if (res.ok && newtask) {
         settasks((prev) => [...prev, newtask]);
-        settitle("");
       } else {
         alert(newtask.error || newtask.message || "Error adding task");
       }
@@ -71,26 +68,15 @@ function App() {
 
   return (
     <div>
-      <form onSubmit={addtask}>
-        <input 
-          type="text"
-          value={title}
-          onChange={(e) => settitle(e.target.value)}
+      <TaskForm addtask={addtask} />
+      {tasks.map((task) => (
+        <TaskItem 
+          key={task._id || task.id} 
+          task={task} 
+          toggleTask={toggleTask} 
+          deletetask={deletetask} 
         />
-        <button type='submit'>addtask</button>
-      </form>
-      {tasks.map((task) => {
-        const taskId = task._id || task.id;
-        return (
-          <div key={taskId}>
-            <p>{task.title}</p>
-            <button onClick={() => toggleTask(taskId, task.completed)}>
-              {task.completed ? "Undo (Completed)" : "Mark Complete"}
-            </button>
-            <button onClick={() => deletetask(taskId)}>Delete</button>
-          </div>
-        );
-      })}
+      ))}
     </div>
   )
 }
