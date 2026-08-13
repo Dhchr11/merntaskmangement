@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import TaskForm from './components/TaskForm'
 import TaskItem from './components/TaskItem'
+import { getTasks, createTask, updateTask, deleteTask } from './services/taskService'
 import './App.css'
 
 function App() {
@@ -10,52 +11,37 @@ function App() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    setLoading(true);
-    setError(null);
-    fetch("http://localhost:5000/api/tasks")
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || data.message || "Failed to fetch tasks");
-        }
+    const fetchTasksData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getTasks();
         if (Array.isArray(data)) {
           settasks(data);
         } else {
           settasks([]);
         }
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Fetch error:", err);
         setError(err.message || "Failed to connect to backend server");
         settasks([]);
-      })
-      .finally(() => {
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchTasksData();
   }, [])
 
   const addtask = async (title) => {
     setIsSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:5000/api/tasks", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: title,
-        }),
-      });
-      const newtask = await res.json();
-      if (res.ok && newtask) {
-        settasks((prev) => [...prev, newtask]);
-      } else {
-        setError(newtask.error || newtask.message || "Error adding task");
-      }
+      const newtask = await createTask(title);
+      settasks((prev) => [...prev, newtask]);
     } catch (err) {
       console.error(err);
-      setError("Failed to add task. Please check server connection.");
+      setError(err.message || "Failed to add task. Please check server connection.");
     } finally {
       setIsSubmitting(false);
     }
@@ -64,42 +50,22 @@ function App() {
   const deletetask = async (id) => {
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
-        method: "DELETE"
-      });
-      const data = await res.json();
-      if (res.ok) {
-        settasks((prev) => prev.filter((item) => (item._id || item.id) !== id));
-      } else {
-        setError(data.error || data.message || "Error deleting task");
-      }
+      await deleteTask(id);
+      settasks((prev) => prev.filter((item) => (item._id || item.id) !== id));
     } catch (err) {
       console.error(err);
-      setError("Failed to delete task. Please check server connection.");
+      setError(err.message || "Failed to delete task. Please check server connection.");
     }
   }
 
   const toggleTask = async (id, currentCompleted) => {
     setError(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          completed: !currentCompleted,
-        }),
-      });
-      const updatedTask = await res.json();
-      if (res.ok) {
-        settasks((prev) => prev.map((item) => ((item._id || item.id) === id ? updatedTask : item)));
-      } else {
-        setError(updatedTask.error || updatedTask.message || "Error updating task");
-      }
+      const updatedTask = await updateTask(id, !currentCompleted);
+      settasks((prev) => prev.map((item) => ((item._id || item.id) === id ? updatedTask : item)));
     } catch (err) {
       console.error(err);
-      setError("Failed to update task. Please check server connection.");
+      setError(err.message || "Failed to update task. Please check server connection.");
     }
   }
 
