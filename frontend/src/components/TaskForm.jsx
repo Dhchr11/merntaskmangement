@@ -3,6 +3,7 @@ import { useState } from 'react';
 function TaskForm({ addtask, isSubmitting }) {
   const [title, settitle] = useState("");
   const [validationError, setValidationError] = useState("");
+  const maxLength = 50;
 
   const handleChange = (e) => {
     settitle(e.target.value);
@@ -25,8 +26,8 @@ function TaskForm({ addtask, isSubmitting }) {
       return;
     }
 
-    if (trimmedTitle.length > 50) {
-      setValidationError("Task title cannot exceed 50 characters.");
+    if (trimmedTitle.length > maxLength) {
+      setValidationError(`Task title cannot exceed ${maxLength} characters.`);
       return;
     }
 
@@ -37,6 +38,9 @@ function TaskForm({ addtask, isSubmitting }) {
     setValidationError("");
   };
 
+  const charCount = title.length;
+  const isNearLimit = charCount >= 45;
+
   return (
     <form onSubmit={handleSubmit}>
       <div>
@@ -44,6 +48,7 @@ function TaskForm({ addtask, isSubmitting }) {
           type="text"
           placeholder="Enter task title (min 3 chars)..."
           value={title}
+          maxLength={maxLength}
           disabled={isSubmitting}
           onChange={handleChange}
         />
@@ -51,6 +56,18 @@ function TaskForm({ addtask, isSubmitting }) {
           {isSubmitting ? "Adding..." : "addtask"}
         </button>
       </div>
+
+      {/* Live Character Counter */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }}>
+        <span style={{ 
+          fontSize: '12px', 
+          color: isNearLimit ? 'red' : '#666',
+          fontWeight: isNearLimit ? 'bold' : 'normal'
+        }}>
+          📝 {charCount}/{maxLength} characters
+        </span>
+      </div>
+
       {validationError && (
         <p style={{ color: 'red', fontSize: '14px', marginTop: '4px' }}>
           ⚠️ {validationError}
