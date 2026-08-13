@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
-function TaskForm({ addtask }) {
+function TaskForm({ addtask, isSubmitting }) {
   const [title, settitle] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || isSubmitting) return;
     addtask(title);
     settitle("");
   };
@@ -16,9 +16,12 @@ function TaskForm({ addtask }) {
         type="text"
         placeholder="Enter task title..."
         value={title}
+        disabled={isSubmitting}
         onChange={(e) => settitle(e.target.value)}
       />
-      <button type="submit">addtask</button>
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Adding..." : "addtask"}
+      </button>
     </form>
   );
 }

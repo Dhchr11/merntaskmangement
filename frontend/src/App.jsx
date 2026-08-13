@@ -5,8 +5,11 @@ import './App.css'
 
 function App() {
   const [tasks, settasks] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
+    setLoading(true);
     fetch("http://localhost:5000/api/tasks")
       .then((res) => res.json())
       .then((data) => {
@@ -20,10 +23,14 @@ function App() {
       .catch((err) => {
         console.error("Fetch error:", err);
         settasks([]);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, [])
 
   const addtask = async (title) => {
+    setIsSubmitting(true);
     try {
       const res = await fetch("http://localhost:5000/api/tasks", {
         method: "POST",
@@ -42,6 +49,8 @@ function App() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -68,15 +77,22 @@ function App() {
 
   return (
     <div>
-      <TaskForm addtask={addtask} />
-      {tasks.map((task) => (
-        <TaskItem 
-          key={task._id || task.id} 
-          task={task} 
-          toggleTask={toggleTask} 
-          deletetask={deletetask} 
-        />
-      ))}
+      <TaskForm addtask={addtask} isSubmitting={isSubmitting} />
+      
+      {loading ? (
+        <p>Loading tasks...</p>
+      ) : tasks.length === 0 ? (
+        <p>No tasks found. Add your first task!</p>
+      ) : (
+        tasks.map((task) => (
+          <TaskItem 
+            key={task._id || task.id} 
+            task={task} 
+            toggleTask={toggleTask} 
+            deletetask={deletetask} 
+          />
+        ))
+      )}
     </div>
   )
 }
